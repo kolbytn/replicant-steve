@@ -1,4 +1,5 @@
 from utils.chat_utils import send_chat
+from utils.mc_utils import get_all_block_types, get_all_entity_types
 from utils.context_utils import Distance, BlockSide, RelativeLocation
 from utils.skill_utils import TaskQueue
 from skills.item import ItemSkills
@@ -6,13 +7,31 @@ from skills.navigate import NavigateSkills
 from skills.construct import ConstructSkills
 
 
-def build_code_context() -> str:
+def build_system_message(bot) -> str:
+    
     code_context = ""
     with open("utils/context_utils.py", "r") as f:
         text = f.read()
         code_context += text.split("### START CONTEXT ###")[1].strip()
     code_context += "\n\n"
 
+    code_context += "NEARBY_BLOCKS = [\n"
+    for block in get_all_block_types():
+        if len(bot.findBlocks(matching=lambda x: x.name == block, maxDistance=32)) > 0:
+            code_context += "    {},\n".format(block)
+    code_context += "]\n\n"
+
+    code_context += "NEARBY_ENTITIES = [\n"
+    for entity in get_all_entity_types():
+        if len(bot.nearestEntity(lambda x: x.name.lower() == entity)) > 0:
+            code_context += "    {},\n".format(entity)
+    code_context += "]\n\n"
+
+    code_context += "INVENTORY = {\n"
+    for item in bot.inventory.items():
+        code_context += "    '{}': {},\n".format(item.name, item.count)
+    code_context += "}\n\n"
+    
     def get_docstrings(cls):
         res = ""
         for attr in dir(cls):
@@ -25,7 +44,7 @@ def build_code_context() -> str:
     code_context += get_docstrings(NavigateSkills)
     code_context += get_docstrings(ConstructSkills)
 
-    return code_context.strip()
+    return "Use the below code to translate user commands to code:\n\n" + code_context.strip()
 
 
 def build_examples() -> str:
@@ -37,13 +56,9 @@ def build_examples() -> str:
     ]
 
 
-def build_system_message() -> str:
-    return "Use the below code to translate user commands to code:\n\n" + build_code_context()
-
-
 def execute_skill(bot, sender, message: str) -> None:
     
-    response = send_chat(build_examples() + [message], system_message=build_system_message())
+    response = send_chat(build_examples() + [message], system_message=build_system_message(bot))
     print("Translated \"{}\" to `{}`".format(message, response))
 
     skill_end = response.find("(")

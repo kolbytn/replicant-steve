@@ -3,7 +3,7 @@ mineflayer = require('mineflayer')
 pathfinder = require('mineflayer-pathfinder')
 collectblock = require('mineflayer-collectblock')
 
-from chat.handle import handle_chat
+from chat.parse import parse_chat
 
 
 BOT_USERNAME = 'python'
@@ -21,17 +21,16 @@ if __name__ == "__main__":
     print("Started mineflayer")
 
     @On(bot, 'spawn')
-    def handle(*args):
+    def handle_spawn(*args):
         print("I spawned 👋")
-        movements = pathfinder.Movements(bot)
 
         @On(bot, 'chat')
-        def handleMsg(this, sender, message, *args):
+        def handle_chat(this, sender, message, *args):
             print("Got message", sender, message)
 
             if sender and (sender != BOT_USERNAME):
-                handle_chat(bot, sender, message)
+                parse_chat(bot, sender, message)
 
     @On(bot, "end")
-    def handle(*args):
+    def handle_end(*args):
         print("Bot ended!", args)

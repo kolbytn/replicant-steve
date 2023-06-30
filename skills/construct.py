@@ -108,6 +108,7 @@ class BuildCube(Task):
         return [("blockPlaced", handle_placed)]
 
 
+# All names and doc strings for all members of this class will be added to the context.
 class ConstructSkills:
 
 

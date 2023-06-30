@@ -5,6 +5,7 @@ pathfinder = require('mineflayer-pathfinder')
 from utils.skill_utils import Task
 
 
+# All names and doc strings for all members of this class will be added to the context.
 class NavigateSkills:
 
 

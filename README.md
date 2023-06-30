@@ -6,25 +6,26 @@ Steve's a Replicant!
 
 Install Node.js >= 14 from [nodejs.org](https://nodejs.org/)
 
-Then, install mineflayer:
+Then, install mineflayer
 ```
 npm install mineflayer
 ```
 
-Install python packages:
+Next, install python packages
 ```
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-Start minecraft server on port `55916`
+Start minecraft server on localhost port `55916`
+
+Add `OPENAI_ORG_ID` and `OPENAI_API_KEY` to your environment variables.
 
 run `python main.py`
 
 ## TODO
 
-- put inventory and local blocks / entities in context
 - queue tasks for item / build prerequisites
 - self assign tasks when inactive
 - track chat and event history

@@ -1,3 +1,4 @@
+from typing import List
 from javascript import require
 import math
 minecraft_data = require('minecraft-data')
@@ -43,6 +44,14 @@ class McVec3:
     
     def __mul__(self, other: float) -> Vec3:
         return McVec3(self.x * other, self.y * other, self.z * other)
+    
+
+def get_all_block_types() -> List[str]:
+    return list(MC_DATA.blocksByName.keys())
+
+
+def get_all_entity_types() -> List[str]:
+    return list(MC_DATA.entitiesByName.keys())
 
 
 def set_global_version(version: str) -> None:
