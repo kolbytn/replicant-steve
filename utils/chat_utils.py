@@ -4,7 +4,8 @@ import time
 import openai
 from openai.error import ServiceUnavailableError, RateLimitError, APIError, InvalidRequestError
 
-openai.organization = os.getenv("OPENAI_ORG_ID")
+if "OPENAI_ORG_ID" in os.environ: 
+    openai.organization = os.getenv("OPENAI_ORG_ID")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 

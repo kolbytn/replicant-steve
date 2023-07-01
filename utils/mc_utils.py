@@ -47,11 +47,11 @@ class McVec3:
     
 
 def get_all_block_types() -> List[str]:
-    return list(MC_DATA.blocksByName.keys())
+    return [x for x in MC_DATA.blocks]
 
 
 def get_all_entity_types() -> List[str]:
-    return list(MC_DATA.entitiesByName.keys())
+    return [x for x in MC_DATA.entities]
 
 
 def set_global_version(version: str) -> None:
@@ -63,6 +63,10 @@ def set_global_version(version: str) -> None:
 
 def get_block_id(block_type: str) -> int:
     return MC_DATA.blocksByName[block_type]
+
+
+def get_item_id(item_type: str) -> int:
+    return MC_DATA.itemsByName[item_type]
 
 
 def block_side_to_vec(block_side: BlockSide, yaw: float) -> Vec3:

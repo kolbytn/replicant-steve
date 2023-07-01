@@ -1,7 +1,7 @@
 from utils.chat_utils import send_chat
 from utils.mc_utils import get_all_block_types, get_all_entity_types
 from utils.context_utils import Distance, BlockSide, RelativeLocation
-from utils.skill_utils import TaskQueue
+from utils.skill_utils import CURRENT_BEHAVIOR
 from skills.item import ItemSkills
 from skills.navigate import NavigateSkills
 from skills.construct import ConstructSkills
@@ -15,22 +15,22 @@ def build_system_message(bot) -> str:
         code_context += text.split("### START CONTEXT ###")[1].strip()
     code_context += "\n\n"
 
-    code_context += "NEARBY_BLOCKS = [\n"
-    for block in get_all_block_types():
-        if len(bot.findBlocks(matching=lambda x: x.name == block, maxDistance=32)) > 0:
-            code_context += "    {},\n".format(block)
-    code_context += "]\n\n"
+    # code_context += "NEARBY_BLOCKS = [\n"
+    # for block in get_all_block_types():
+    #     if sum([1 for _ in bot.findBlocks(dict(matching=lambda x: x.name == block, maxDistance=32))]) > 0:
+    #         code_context += "    {},\n".format(block)
+    # code_context += "]\n\n"
 
-    code_context += "NEARBY_ENTITIES = [\n"
-    for entity in get_all_entity_types():
-        if len(bot.nearestEntity(lambda x: x.name.lower() == entity)) > 0:
-            code_context += "    {},\n".format(entity)
-    code_context += "]\n\n"
+    # code_context += "NEARBY_ENTITIES = [\n"
+    # for entity in get_all_entity_types():
+    #     if sum([1 for _ in bot.nearestEntity(lambda x: x.name.lower() == entity)]) > 0:
+    #         code_context += "    {},\n".format(entity)
+    # code_context += "]\n\n"
 
-    code_context += "INVENTORY = {\n"
-    for item in bot.inventory.items():
-        code_context += "    '{}': {},\n".format(item.name, item.count)
-    code_context += "}\n\n"
+    # code_context += "INVENTORY = {\n"
+    # for item in bot.inventory.items():
+    #     code_context += "    '{}': {},\n".format(item.name, item.count)
+    # code_context += "}\n\n"
     
     def get_docstrings(cls):
         res = ""
@@ -90,11 +90,14 @@ def execute_skill(bot, sender, message: str) -> None:
             skill_args.append(get_arg(arg))
 
     if hasattr(ItemSkills, skill_name):
-        TaskQueue().queue_task(getattr(ItemSkills, skill_name)(bot, *skill_args, **skill_kwargs))
+        CURRENT_BEHAVIOR = getattr(ItemSkills, skill_name)(*skill_args, bot=bot, child=None, **skill_kwargs)
+        CURRENT_BEHAVIOR.start()
     elif hasattr(NavigateSkills, skill_name):
-        TaskQueue().queue_task(getattr(NavigateSkills, skill_name)(bot, sender, *skill_args, **skill_kwargs))
+        CURRENT_BEHAVIOR = getattr(NavigateSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        CURRENT_BEHAVIOR.start()
     elif hasattr(ConstructSkills, skill_name):
-        TaskQueue().queue_task(getattr(ConstructSkills, skill_name)(bot, sender, *skill_args, **skill_kwargs))
+        CURRENT_BEHAVIOR = getattr(ConstructSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        CURRENT_BEHAVIOR.start()
     else:
         bot.chat("I don't know how to " + message)
         print("Failed to call", response)

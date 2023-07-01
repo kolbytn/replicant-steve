@@ -2,27 +2,23 @@ from typing import List, Tuple
 from javascript import require
 pathfinder = require('mineflayer-pathfinder')
 
-from utils.skill_utils import Task
+from utils.skill_utils import BehaviorNode
 
 
 # All names and doc strings for all members of this class will be added to the context.
 class NavigateSkills:
 
 
-    class ComeHere(Task):
+    class ComeHere(BehaviorNode):
         """
         Tells the bot to come to the player's location.
         """
 
-        def __init__(self, bot, sender):
+        def __init__(self, sender, **kwargs):
             self.sender = sender
-            super().__init__(bot)
+            super().__init__(**kwargs)
 
-        @property
-        def task_id(self):
-            return "come_here"
-
-        def init_task(self) -> None:
+        def _init_behavior(self) -> None:
             player = self.bot.players[self.sender]
             target = player.entity
             if not target:
@@ -33,34 +29,30 @@ class NavigateSkills:
             self.bot.pathfinder.setMovements(pathfinder.Movements(self.bot))
             self.bot.pathfinder.setGoal(pathfinder.goals.GoalNear(pos.x, pos.y, pos.z, 1))
 
-        def get_listeners(self) -> List[Tuple[str, callable]]:
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
 
             def handle_goal_reached(this, *args):
                 print("Reached goal location")
-                self.finish_task()
+                self.finish()
 
             return [("goal_reached", handle_goal_reached)]
 
 
-    class FollowPlayer(Task):
+    class FollowPlayer(BehaviorNode):
         """
         Tells the bot to follow the player until told to stop.
         """
 
-        def __init__(self, bot, sender):
+        def __init__(self, sender, **kwargs):
             self.sender = sender
             self.update_freq = 10
             self.last_update = 0
-            super().__init__(bot)
+            super().__init__(**kwargs)
 
-        @property
-        def task_id(self):
-            return "follow_player"
-
-        def init_task(self) -> None:
+        def _init_behavior(self) -> None:
             pass
 
-        def get_listeners(self) -> List[Tuple[str, callable]]:
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
 
             def follow(this, *args):
                 self.last_update += 1
@@ -80,20 +72,16 @@ class NavigateSkills:
             return [("physicsTick", follow)]
 
 
-    class MoveLooking(Task):
+    class MoveLooking(BehaviorNode):
         """
         Tells the bot to move to the position the player is looking at.
         """
 
-        def __init__(self, bot, sender):
+        def __init__(self, sender, **kwargs):
             self.sender = sender
-            super().__init__(bot)
+            super().__init__(**kwargs)
 
-        @property
-        def task_id(self):
-            return "move_looking"
-
-        def init_task(self) -> None:
+        def _init_behavior(self) -> None:
             entity = self.bot.nearestEntity(lambda x: x.username == self.sender)
 
             # x, y, z = entity.position.x, entity.position.y + 1.6, entity.position.z
@@ -107,10 +95,10 @@ class NavigateSkills:
             self.bot.pathfinder.setMovements(pathfinder.Movements(self.bot))
             self.bot.pathfinder.setGoal(pathfinder.goals.GoalNear(block.x, block.x, block.x, 1))
 
-        def get_listeners(self) -> List[Tuple[str, callable]]:
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
 
             def handle_goal_reached(this, *args):
                 print("Reached goal location")
-                self.finish_task()
+                self.finish()
 
             return [("goal_reached", handle_goal_reached)]

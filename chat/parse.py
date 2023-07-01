@@ -1,10 +1,10 @@
 from utils.chat_utils import send_chat
-from utils.skill_utils import TaskQueue
+from utils.skill_utils import CURRENT_BEHAVIOR
 from chat.skill import execute_skill
 from chat.conversation import execute_conversation
 
 
-def handle_chat(bot, sender, message: str) -> None:
+def parse_chat(bot, sender, message: str) -> None:
     
     system_message = "You are a Minecraft bot. Determine whether the player wants to chat or is giving you a command or is telling you to stop."
     turns = [
@@ -29,7 +29,7 @@ def handle_chat(bot, sender, message: str) -> None:
 
     print("Predicted type:", response)
     if "command" in response:
-        if TaskQueue().busy:
+        if CURRENT_BEHAVIOR is not None:
             bot.chat("I'm busy right now. You can ask me to stop what I'm doing first if you want me to change tasks.")
         else:
             execute_skill(bot, sender, message)
@@ -37,7 +37,7 @@ def handle_chat(bot, sender, message: str) -> None:
         execute_conversation(bot, sender, message)
     elif "stop" in response:
         bot.chat("Okay, I'll stop.")
-        TaskQueue().cancel_tasks()
+        CURRENT_BEHAVIOR.stop()
     else:
         bot.chat("I don't understand what you mean by that.")
     print()
