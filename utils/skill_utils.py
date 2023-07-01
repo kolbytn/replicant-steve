@@ -4,13 +4,13 @@ from typing import List, Tuple, Union
 CURRENT_BEHAVIOR = None
 
 
+# TODO have behavior timeout
 class BehaviorNode:
 
-    # TODO have behavior timeout
     def __init__(self, bot=None, child: Union["BehaviorNode", callable] = None):
         assert bot is not None
         self.bot = bot
-        self._get_child = lambda: child if isinstance(child, BehaviorNode) else child
+        self._get_child = child if callable(child) else lambda: child
 
     def start(self):
         for name, fun in self._get_transitions():

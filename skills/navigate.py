@@ -1,8 +1,10 @@
 from typing import List, Tuple
 from javascript import require
 pathfinder = require('mineflayer-pathfinder')
+import math
 
 from utils.skill_utils import BehaviorNode
+from utils.mc_utils import McVec3
 
 
 # All names and doc strings for all members of this class will be added to the context.
@@ -84,16 +86,18 @@ class NavigateSkills:
         def _init_behavior(self) -> None:
             entity = self.bot.nearestEntity(lambda x: x.username == self.sender)
 
-            # x, y, z = entity.position.x, entity.position.y + 1.6, entity.position.z
-            # while bot.blockAt(init_vec(x, y, z)).name == "air":
-            #     x -= math.cos(entity.pitch) * math.sin(entity.yaw)
-            #     y += math.sin(entity.pitch)
-            #     z -= math.cos(entity.pitch) * math.cos(entity.yaw)
+            x, y, z = entity.position.x, entity.position.y + 1.6, entity.position.z
+            while self.bot.blockAt(McVec3(x, y, z)).name == "air":
+                x -= math.cos(entity.pitch) * math.sin(entity.yaw)
+                y += math.sin(entity.pitch)
+                z -= math.cos(entity.pitch) * math.cos(entity.yaw)
 
-            block = self.bot.blockAtEntityCursor(entity)
+            # TODO: why doesn't this work?
+            # block = self.bot.blockAtEntityCursor(entity)
+            # x, y, z = block.x, block.y, block.z
 
             self.bot.pathfinder.setMovements(pathfinder.Movements(self.bot))
-            self.bot.pathfinder.setGoal(pathfinder.goals.GoalNear(block.x, block.x, block.x, 1))
+            self.bot.pathfinder.setGoal(pathfinder.goals.GoalNear(x, x, x, 1))
 
         def _get_transitions(self) -> List[Tuple[str, callable]]:
 

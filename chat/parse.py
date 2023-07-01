@@ -38,6 +38,7 @@ def parse_chat(bot, sender, message: str) -> None:
     elif "stop" in response:
         bot.chat("Okay, I'll stop.")
         CURRENT_BEHAVIOR.stop()
+        CURRENT_BEHAVIOR = None
     else:
         bot.chat("I don't understand what you mean by that.")
     print()

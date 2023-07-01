@@ -63,7 +63,7 @@ def place(bot, position: McVec3, block_type: str) -> bool:
     return True
 
 
-class BuildCube(BehaviorNode):
+class BuildCubeOffset(BehaviorNode):
     def __init__(self, sender, block_type: str, center_x: int, center_z: int, center_y: int, size_x: int, 
                  size_z: int, size_y: int, **kwargs):
         self.sender = sender
@@ -153,97 +153,108 @@ class ConstructSkills:
             return [("blockPlaced", handle_placed)]
         
 
-    # class BuildCube(TaskSequence):
-    #     """
-    #     Build a cube of the specified type and dimensions.
-    #     Args:
-    #         block_type (str): The type of block to build the cube out of.
-    #         size_x (int): The side-to-side size of the cube.
-    #         size_z (int): The front-to-back size of the cube.
-    #         size_y (int): The height of the cube.
-    #         location (RelativeLocation, optional): Where to center the cube. Default is RelativeLocation.BOT_STANDING.
-    #     """
+    # TODO this regularly fails
+    class BuildCube(BehaviorNode):
+        """
+        Build a cube of the specified type and dimensions.
+        Args:
+            block_type (str): The type of block to build the cube out of.
+            size_x (int): The side-to-side size of the cube.
+            size_z (int): The front-to-back size of the cube.
+            size_y (int): The height of the cube.
+            location (RelativeLocation, optional): Where to center the cube. Default is RelativeLocation.BOT_STANDING.
+        """
 
-    #     def __init__(self, bot, sender, block_type: str, size_x: int, size_z: int, size_y: int, 
-    #                  location: RelativeLocation = RelativeLocation.BOT_STANDING):
-    #         self.bot = bot
-    #         self.sender = sender
-    #         self.block_type = block_type
-    #         self.size_x = size_x
-    #         self.size_z = size_z
-    #         self.size_y = size_y
-    #         self.location = location
-    #         self.to_place = []
+        def __init__(self, sender, block_type: str, size_x: int, size_z: int, size_y: int, 
+                     location: RelativeLocation = RelativeLocation.BOT_STANDING, **kwargs):
+            self.sender = sender
+            self.block_type = block_type
+            self.size_x = size_x
+            self.size_z = size_z
+            self.size_y = size_y
+            self.location = location
+            self.center = None
+            kwargs.pop("child")
+            super().__init__(child=self._build_child, **kwargs)
         
-    #     def get_tasks(self) -> List[Task]:
-    #         if self.location == RelativeLocation.BOT_STANDING:
-    #             center = McVec3.from_vec3(self.bot.entity.position)
-    #         elif self.location == RelativeLocation.BOT_LOOKING:
-    #             center = McVec3.from_vec3(self.bot.blockAtEntityCursor(self.bot.entity).position)
-    #         elif self.location == RelativeLocation.PLAYER_STANDING:
-    #             center = McVec3.from_vec3(
-    #                 self.bot.nearestEntity(lambda x: x.username == self.sender).position
-    #             )
-    #         else:
-    #             center = McVec3.from_vec3(
-    #                 self.bot.blockAtEntityCursor(
-    #                     self.bot.nearestEntity(lambda x: x.username == self.sender)
-    #                 ).position
-    #             )
+        def _init_behavior(self) -> None:
+            if self.location == RelativeLocation.BOT_STANDING:
+                self.center = McVec3.from_vec3(self.bot.entity.position)
+            elif self.location == RelativeLocation.BOT_LOOKING:
+                self.center = McVec3.from_vec3(self.bot.blockAtEntityCursor(self.bot.entity).position)
+            elif self.location == RelativeLocation.PLAYER_STANDING:
+                self.center = McVec3.from_vec3(
+                    self.bot.nearestEntity(lambda x: x.username == self.sender).position
+                )
+            else:
+                self.center = McVec3.from_vec3(
+                    self.bot.blockAtEntityCursor(
+                        self.bot.nearestEntity(lambda x: x.username == self.sender)
+                    ).position
+                )
+            self.finish()
 
-    #         return [Task(self.bot, self.sender, self.block_type, center.x, center.z, center.y + 1, self.size_x, 
-    #                      self.size_z, self.size_y)]
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
+            return []
+
+        def _build_child(self) -> BehaviorNode:
+            return BuildCubeOffset(self.sender, self.block_type, self.center.x, self.center.z, self.center.y, 
+                                   self.size_x, self.size_z, self.size_y, bot=self.bot)
 
     
-    # class BuildBox(TaskSequence):
-    #     """
-    #     Build a hollow box of the specified type and dimensions.
-    #     Args:
-    #         block_type (str): The type of block to build the box out of.
-    #         size_x (int): The side-to-side size of the box.
-    #         size_z (int): The front-to-back size of the box.
-    #         size_y (int): The height of the box.
-    #         location (RelativeLocation, optional): Where to center the box. Default is RelativeLocation.BOT_STANDING.
-    #     """
+    # TODO test this
+    class BuildBox(BehaviorNode):
+        """
+        Build a hollow box of the specified type and dimensions.
+        Args:
+            block_type (str): The type of block to build the box out of.
+            size_x (int): The side-to-side size of the box.
+            size_z (int): The front-to-back size of the box.
+            size_y (int): The height of the box.
+            location (RelativeLocation, optional): Where to center the box. Default is RelativeLocation.BOT_STANDING.
+        """
 
-    #     def __init__(self, bot, sender, block_type: str, size_x: int, size_z: int, size_y: int, 
-    #                  location: RelativeLocation = RelativeLocation.BOT_STANDING):
-    #         self.bot = bot
-    #         self.sender = sender
-    #         self.block_type = block_type
-    #         self.size_x = size_x
-    #         self.size_z = size_z
-    #         self.size_y = size_y
-    #         self.location = location
-    #         self.to_place = []
+        def __init__(self, sender, block_type: str, size_x: int, size_z: int, size_y: int, 
+                     location: RelativeLocation = RelativeLocation.BOT_STANDING, **kwargs):
+            self.sender = sender
+            self.block_type = block_type
+            self.size_x = size_x
+            self.size_z = size_z
+            self.size_y = size_y
+            self.location = location
+            self.center = None
+            kwargs.pop("child")
+            super().__init__(child=self._build_child, **kwargs)
 
-    #     def get_tasks(self) -> List[Task]:
-    #         if self.location == RelativeLocation.BOT_STANDING:
-    #             center = McVec3.from_vec3(self.bot.entity.position)
-    #         elif self.location == RelativeLocation.BOT_LOOKING:
-    #             center = McVec3.from_vec3(self.bot.blockAtEntityCursor(self.bot.entity).position)
-    #         elif self.location == RelativeLocation.PLAYER_STANDING:
-    #             center = McVec3.from_vec3(
-    #                 self.bot.nearestEntity(lambda x: x.username == self.sender).position
-    #             )
-    #         else:
-    #             center = McVec3.from_vec3(
-    #                 self.bot.blockAtEntityCursor(
-    #                     self.bot.nearestEntity(lambda x: x.username == self.sender)
-    #                 ).position
-    #             )
+        def get_tasks(self) -> None:
+            if self.location == RelativeLocation.BOT_STANDING:
+                self.center = McVec3.from_vec3(self.bot.entity.position)
+            elif self.location == RelativeLocation.BOT_LOOKING:
+                self.center = McVec3.from_vec3(self.bot.blockAtEntityCursor(self.bot.entity).position)
+            elif self.location == RelativeLocation.PLAYER_STANDING:
+                self.center = McVec3.from_vec3(
+                    self.bot.nearestEntity(lambda x: x.username == self.sender).position
+                )
+            else:
+                self.center = McVec3.from_vec3(
+                    self.bot.blockAtEntityCursor(
+                        self.bot.nearestEntity(lambda x: x.username == self.sender)
+                    ).position
+                )
+            self.finish()
 
-    #         return [
-    #             Task(self.bot, self.sender, self.block_type, center.x, center.z, center.y, 
-    #                  self.size_x, self.size_z, 1),
-    #             Task(self.bot, self.sender, self.block_type, center.x - math.floor(self.size_x / 2), 
-    #                  center.z, center.y, 1, self.size_z, self.size_y),
-    #             Task(self.bot, self.sender, self.block_type, center.x + math.ceil(self.size_x / 2), 
-    #                  center.z, center.y, 1, self.size_z, self.size_y),
-    #             Task(self.bot, self.sender, self.block_type, center.x, center.z - math.floor(self.size_x / 2), 
-    #                  center.y, self.size_x, 1, self.size_y),
-    #             Task(self.bot, self.sender, self.block_type, center.x, center.z + math.ceil(self.size_x / 2), 
-    #                  center.y, self.size_x, 1, self.size_y),
-    #             Task(self.bot, self.sender, self.block_type, center.x, center.z, center.y + self.size_y,
-    #                  self.size_x, self.size_z, 1)
-    #         ]
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
+            return []
+        
+        def _build_child(self) -> BehaviorNode:
+            return BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x, self.center.z, self.center.y, self.size_x, self.size_z, 1, bot=self.bot,
+                child=BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x - math.floor(self.size_x / 2), self.center.z, self.center.y, 1, self.size_z, self.size_y, bot=self.bot, 
+                    child=BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x + math.ceil(self.size_x / 2), self.center.z, self.center.y, 1, self.size_z, self.size_y, bot=self.bot,
+                        child=BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x, self.center.z - math.floor(self.size_x / 2), self.center.y, self.size_x, 1, self.size_y, bot=self.bot,
+                            child=BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x, self.center.z + math.ceil(self.size_x / 2), self.center.y, self.size_x, 1, self.size_y, bot=self.bot,
+                                child=BuildCubeOffset(self.bot, self.sender, self.block_type, self.center.x, self.center.z, self.center.y + self.size_y, self.size_x, self.size_z, 1, bot=self.bot)
+                            )
+                        )
+                    )
+                )
+            )

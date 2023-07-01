@@ -15,6 +15,7 @@ def build_system_message(bot) -> str:
         code_context += text.split("### START CONTEXT ###")[1].strip()
     code_context += "\n\n"
 
+    # TODO fix: these throw errors when trying to get the length of the return values 
     # code_context += "NEARBY_BLOCKS = [\n"
     # for block in get_all_block_types():
     #     if sum([1 for _ in bot.findBlocks(dict(matching=lambda x: x.name == block, maxDistance=32))]) > 0:

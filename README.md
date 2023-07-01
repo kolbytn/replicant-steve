@@ -26,8 +26,7 @@ run `python main.py`
 
 ## TODO
 
-- queue tasks for item / build prerequisites
+- item / build prerequisites
 - self assign tasks when inactive
 - track chat and event history
-- recursive tasks??
   

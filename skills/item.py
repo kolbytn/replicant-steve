@@ -52,7 +52,7 @@ class PlaceCraftingTable(BehaviorNode):
         def handle_place(this, old_block, new_block, *args):
             if new_block.name == "crafting_table":
                 self.finish()
-        return [("blockPlaced", handle_place)]      
+        return [("blockPlaced", handle_place)]
 
 
 # All names and doc strings for all members of this class will be added to the context.
