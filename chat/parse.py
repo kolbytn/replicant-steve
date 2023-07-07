@@ -1,5 +1,5 @@
 from utils.chat_utils import send_chat
-from utils.skill_utils import CURRENT_BEHAVIOR
+import utils.skill_utils as behavior
 from chat.skill import execute_skill
 from chat.conversation import execute_conversation
 
@@ -21,6 +21,8 @@ def parse_chat(bot, sender, message: str) -> None:
         "Player message: I want to find diamond ore",
         "chat",
         "Player message: Hi. Will you follow me please?",
+        "command",
+        "Player message: Where are you?",
         "command"
     ]
 
@@ -28,9 +30,10 @@ def parse_chat(bot, sender, message: str) -> None:
     response = send_chat(turns + ["Player message: {}".format(message)], system_message=system_message)
 
     print("Predicted type:", response)
+    CURRENT_BEHAVIOR = behavior.CURRENT_BEHAVIOR
     if "command" in response:
         if CURRENT_BEHAVIOR is not None:
-            bot.chat("I'm busy right now. You can ask me to stop what I'm doing first if you want me to change tasks.")
+            bot.chat("I'm busy right now with {}. Ask me to 'stop' first if you want me to change tasks.".format(CURRENT_BEHAVIOR.__class__.__name__))
         else:
             execute_skill(bot, sender, message)
     elif "chat" in response:
@@ -38,7 +41,8 @@ def parse_chat(bot, sender, message: str) -> None:
     elif "stop" in response:
         bot.chat("Okay, I'll stop.")
         CURRENT_BEHAVIOR.stop()
-        CURRENT_BEHAVIOR = None
+        behavior.CURRENT_BEHAVIOR = None
+
     else:
         bot.chat("I don't understand what you mean by that.")
     print()
