@@ -24,8 +24,11 @@ class BehaviorNode:
     def finish(self):
         self.stop()
         child = self._get_child()
+        global CURRENT_BEHAVIOR
+        CURRENT_BEHAVIOR = None
         if child is not None:
             child.start()
+            # TODO: current behavior should be set to child
 
     def _init_behavior(self):
         raise NotImplementedError()

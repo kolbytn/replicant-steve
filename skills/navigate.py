@@ -64,7 +64,7 @@ class NavigateSkills:
                     target = player.entity
                     if not target:
                         self.bot.chat("I don't see you!")
-                        self.finish_task()
+                        self.finish()
                         return
 
                     pos = target.position
@@ -106,3 +106,20 @@ class NavigateSkills:
                 self.finish()
 
             return [("goal_reached", handle_goal_reached)]
+
+    class WhereAreYou(BehaviorNode):
+        """
+        Tells the bot to tell the player where it is.
+        """
+
+        def __init__(self, sender, **kwargs):
+            self.sender = sender
+            super().__init__(**kwargs)
+
+        def _init_behavior(self) -> None:
+            pos = self.bot.entity.position
+            self.bot.chat("I am at {}, {}, {}".format(pos.x, pos.y, pos.z))
+            self.finish()
+
+        def _get_transitions(self) -> List[Tuple[str, callable]]:
+            return []
