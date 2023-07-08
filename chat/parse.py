@@ -22,8 +22,6 @@ def parse_chat(bot, sender, message: str) -> None:
         "chat",
         "Player message: Hi. Will you follow me please?",
         "command",
-        "Player message: Where are you?",
-        "command"
     ]
 
     print("Predicting type of message:", message)
