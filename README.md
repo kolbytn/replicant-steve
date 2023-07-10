@@ -29,4 +29,5 @@ run `python main.py`
 - item / build prerequisites
 - self assign tasks when inactive
 - track chat and event history
+- parser for gpt generated code
   

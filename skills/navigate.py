@@ -84,17 +84,13 @@ class NavigateSkills:
             super().__init__(**kwargs)
 
         def _init_behavior(self) -> None:
-            entity = self.bot.nearestEntity(lambda x: x.username == self.sender)
+            entity = self.bot.players[self.sender].entity
 
             x, y, z = entity.position.x, entity.position.y + 1.6, entity.position.z
             while self.bot.blockAt(McVec3(x, y, z)).name == "air":
                 x -= math.cos(entity.pitch) * math.sin(entity.yaw)
                 y += math.sin(entity.pitch)
                 z -= math.cos(entity.pitch) * math.cos(entity.yaw)
-
-            # TODO: why doesn't this work?
-            # block = self.bot.blockAtEntityCursor(entity)
-            # x, y, z = block.x, block.y, block.z
 
             self.bot.pathfinder.setMovements(pathfinder.Movements(self.bot))
             self.bot.pathfinder.setGoal(pathfinder.goals.GoalNear(x, x, x, 1))

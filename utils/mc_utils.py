@@ -46,12 +46,16 @@ class McVec3:
         return McVec3(self.x * other, self.y * other, self.z * other)
     
 
-def get_all_block_types() -> List[str]:
-    return [x for x in MC_DATA.blocks]
+def get_all_block_names() -> List[str]:
+    return [MC_DATA.blocks[x].name for x in MC_DATA.blocks]
+    
+
+def get_all_block_ids() -> List[str]:
+    return [int(x) for x in MC_DATA.blocks]
 
 
 def get_all_entity_types() -> List[str]:
-    return [x for x in MC_DATA.entities]
+    return [MC_DATA.entities[x].name for x in MC_DATA.entities]
 
 
 def set_global_version(version: str) -> None:

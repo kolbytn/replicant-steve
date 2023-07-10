@@ -7,7 +7,6 @@ from chat.parse import parse_chat
 
 
 BOT_USERNAME = 'python'
-CHAT_COMMAND = 'say'
 
 
 if __name__ == "__main__":
@@ -30,11 +29,7 @@ if __name__ == "__main__":
             print("Got message", sender, message)
 
             if sender and (sender != BOT_USERNAME):
-                if message.startswith(CHAT_COMMAND):
-                    message = message[len(CHAT_COMMAND):].strip()
-                    parse_chat(bot, sender, message)
-                else:
-                    print("Ignoring message from", sender, "because it doesn't start with", CHAT_COMMAND)
+                parse_chat(bot, sender, message)
 
     @On(bot, "end")
     def handle_end(*args):

@@ -1,5 +1,5 @@
 from utils.chat_utils import send_chat
-from utils.mc_utils import get_all_block_types, get_all_entity_types
+from utils.mc_utils import get_all_block_ids
 from utils.context_utils import Distance, BlockSide, RelativeLocation
 import utils.skill_utils as behavior
 from skills.item import ItemSkills
@@ -15,23 +15,30 @@ def build_system_message(bot) -> str:
         code_context += text.split("### START CONTEXT ###")[1].strip()
     code_context += "\n\n"
 
-    # TODO fix: these throw errors when trying to get the length of the return values 
-    # code_context += "NEARBY_BLOCKS = [\n"
-    # for block in get_all_block_types():
-    #     if sum([1 for _ in bot.findBlocks(dict(matching=lambda x: x.name == block, maxDistance=32))]) > 0:
-    #         code_context += "    {},\n".format(block)
-    # code_context += "]\n\n"
+    code_context += "NEARBY_BLOCKS = [\n"
+    positions = bot.findBlocks(dict(matching=get_all_block_ids(), maxDistance=16, count=4096))
+    found = set()
+    for vec in positions:
+        block = bot.blockAt(vec)
+        if block.name not in found:
+            code_context += "    '{}',\n".format(block.name)
+            found.add(block.name)
+    code_context += "]\n\n"
 
+    # Blocked, see: https://github.com/PrismarineJS/mineflayer/issues/3103
     # code_context += "NEARBY_ENTITIES = [\n"
-    # for entity in get_all_entity_types():
-    #     if sum([1 for _ in bot.nearestEntity(lambda x: x.name.lower() == entity)]) > 0:
-    #         code_context += "    {},\n".format(entity)
+    # for entity_name in get_all_entity_types():
+    #     print(entity_name)
+    #     nearest = bot.nearestEntity(lambda x: x.name == entity_name)
+    #     print(nearest)
+    #     if nearest is not None:
+    #         code_context += "    {},\n".format(entity_name)
     # code_context += "]\n\n"
 
-    # code_context += "INVENTORY = {\n"
-    # for item in bot.inventory.items():
-    #     code_context += "    '{}': {},\n".format(item.name, item.count)
-    # code_context += "}\n\n"
+    code_context += "INVENTORY = {\n"
+    for item in bot.inventory.items():
+        code_context += "    '{}': {},\n".format(item.name, item.count)
+    code_context += "}\n\n"
     
     def get_docstrings(cls):
         res = ""
