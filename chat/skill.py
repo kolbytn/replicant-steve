@@ -1,7 +1,7 @@
 from utils.chat_utils import send_chat
 from utils.mc_utils import get_all_block_types, get_all_entity_types
 from utils.context_utils import Distance, BlockSide, RelativeLocation
-from utils.skill_utils import CURRENT_BEHAVIOR
+import utils.skill_utils as behavior
 from skills.item import ItemSkills
 from skills.navigate import NavigateSkills
 from skills.construct import ConstructSkills
@@ -91,14 +91,14 @@ def execute_skill(bot, sender, message: str) -> None:
             skill_args.append(get_arg(arg))
 
     if hasattr(ItemSkills, skill_name):
-        CURRENT_BEHAVIOR = getattr(ItemSkills, skill_name)(*skill_args, bot=bot, child=None, **skill_kwargs)
-        CURRENT_BEHAVIOR.start()
+        behavior.CURRENT_BEHAVIOR = getattr(ItemSkills, skill_name)(*skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR.start()
     elif hasattr(NavigateSkills, skill_name):
-        CURRENT_BEHAVIOR = getattr(NavigateSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
-        CURRENT_BEHAVIOR.start()
+        behavior.CURRENT_BEHAVIOR = getattr(NavigateSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR.start()
     elif hasattr(ConstructSkills, skill_name):
-        CURRENT_BEHAVIOR = getattr(ConstructSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
-        CURRENT_BEHAVIOR.start()
+        behavior.CURRENT_BEHAVIOR = getattr(ConstructSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR.start()
     else:
         bot.chat("I don't know how to " + message)
         print("Failed to call", response)

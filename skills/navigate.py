@@ -64,7 +64,7 @@ class NavigateSkills:
                     target = player.entity
                     if not target:
                         self.bot.chat("I don't see you!")
-                        self.finish_task()
+                        self.finish()
                         return
 
                     pos = target.position
