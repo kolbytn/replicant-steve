@@ -50,8 +50,8 @@ def get_all_block_names() -> List[str]:
     return [MC_DATA.blocks[x].name for x in MC_DATA.blocks]
     
 
-def get_all_block_ids() -> List[str]:
-    return [int(x) for x in MC_DATA.blocks]
+def get_all_block_ids(to_ignore : List[str] = []) -> List[str]:
+    return [int(x) for x in MC_DATA.blocks if MC_DATA.blocks[x].name not in to_ignore]
 
 
 def get_all_entity_types() -> List[str]:
