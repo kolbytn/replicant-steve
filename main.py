@@ -24,7 +24,7 @@ if __name__ == "__main__":
     def handle_spawn(*args):
         print("I spawned 👋")
 
-        @On(bot, 'chat')
+        @On(bot, 'whisper')
         def handle_chat(this, sender, message, *args):
             print("Got message", sender, message)
 
