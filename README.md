@@ -26,8 +26,8 @@ run `python main.py`
 
 ## TODO
 
-- item / build prerequisites
 - self assign tasks when inactive
+- skill specific contexts
 - track chat and event history
 - parser for gpt generated code
   

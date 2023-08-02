@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict, Any
 from javascript import require
+from copy import deepcopy
 import math
 minecraft_data = require('minecraft-data')
 Vec3 = require("vec3").Vec3
@@ -44,7 +45,7 @@ class McVec3:
     
     def __mul__(self, other: float) -> Vec3:
         return McVec3(self.x * other, self.y * other, self.z * other)
-    
+
 
 def get_all_block_names() -> List[str]:
     return [MC_DATA.blocks[x].name for x in MC_DATA.blocks]
@@ -52,6 +53,21 @@ def get_all_block_names() -> List[str]:
 
 def get_all_block_ids(to_ignore : List[str] = []) -> List[str]:
     return [int(x) for x in MC_DATA.blocks if MC_DATA.blocks[x].name not in to_ignore]
+
+
+def get_block_type(block_id: int) -> str:
+    return MC_DATA.blocks[block_id].name
+
+
+def get_all_item_names() -> List[str]:
+    return [MC_DATA.items[x].name for x in MC_DATA.items]
+
+
+def get_all_item_ids(to_ignore : List[str] = []) -> List[str]:
+    return [int(x) for x in MC_DATA.items if MC_DATA.items[x].name not in to_ignore]
+
+def get_item_type(item_id: int) -> str:
+    return MC_DATA.items[item_id].name
 
 
 def get_all_entity_types() -> List[str]:
@@ -66,11 +82,44 @@ def set_global_version(version: str) -> None:
 
 
 def get_block_id(block_type: str) -> int:
-    return MC_DATA.blocksByName[block_type]
+    return MC_DATA.blocksByName[block_type].id
 
 
 def get_item_id(item_type: str) -> int:
-    return MC_DATA.itemsByName[item_type]
+    return MC_DATA.itemsByName[item_type].id
+
+
+# def get_missing_items(item_type: str, inventory: Dict[str, int] = dict()) -> Dict[str, Any]:
+#     target_id = get_item_id(item_type)
+#     recipes = []
+#     for recipe_id in MC_DATA.recipes:
+#         if MC_DATA.recipes[recipe_id].result.id == target_id:
+#             recipes.append(MC_DATA.recipes[recipe_id])
+
+#     needed = [
+#         {
+#             MC_DATA.blocks[ingredient.id].name: ingredient.count
+#             for ingredient in recipe
+#         }
+#         for recipe in recipes
+#     ]
+#     inventories = [deepcopy(inventory) for _ in range(len(needed))]
+
+#     for i in range(len(needed)):
+#         for ingredient in needed[i]:
+#             if ingredient in inventories[i]:
+#                 inventories[i][ingredient] = max(0, inventories[i][ingredient] - needed[i][ingredient])
+#                 needed[i][ingredient] = max(0, needed[i][ingredient] - inventories[i][ingredient])
+
+#     for i, recipe in enumerate(needed):
+#         additional_items = dict()
+#         for ingredient in recipe:
+#             if recipe[ingredient] > 0:
+#                 updated_missing, updated_inventory = get_missing_items(ingredient, inventories[i])
+#                 for item in updated_missing:
+#                     if item not in additional_items:
+#                         additional_items[item] = 0
+#                     additional_items[item] += updated_missing[item]
 
 
 def block_side_to_vec(block_side: BlockSide, yaw: float) -> Vec3:

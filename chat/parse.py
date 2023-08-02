@@ -6,7 +6,7 @@ from chat.conversation import execute_conversation
 
 def parse_chat(bot, sender, message: str) -> None:
     
-    system_message = "You are a Minecraft bot. Determine whether the player wants to chat or is giving you a command or is telling you to stop."
+    system_message = "You are playing Minecraft. Determine whether the other player wants to chat or is giving you a command or is telling you to stop."
     turns = [
         "Player message: Hello! How are you today?",
         "chat",
@@ -22,6 +22,8 @@ def parse_chat(bot, sender, message: str) -> None:
         "chat",
         "Player message: Hi. Will you follow me please?",
         "command",
+        "Player message: What's in your inventory?",
+        "chat",
     ]
 
     print("Predicting type of message:", message)

@@ -69,13 +69,13 @@ def execute_skill(bot, sender, message: str) -> None:
             skill_args.append(get_arg(arg))
 
     if hasattr(ItemSkills, skill_name):
-        behavior.CURRENT_BEHAVIOR = getattr(ItemSkills, skill_name)(*skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR = getattr(ItemSkills, skill_name)(*skill_args, bot=bot, **skill_kwargs)
         behavior.CURRENT_BEHAVIOR.start()
     elif hasattr(NavigateSkills, skill_name):
-        behavior.CURRENT_BEHAVIOR = getattr(NavigateSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR = getattr(NavigateSkills, skill_name)(sender, *skill_args, bot=bot, **skill_kwargs)
         behavior.CURRENT_BEHAVIOR.start()
     elif hasattr(ConstructSkills, skill_name):
-        behavior.CURRENT_BEHAVIOR = getattr(ConstructSkills, skill_name)(sender, *skill_args, bot=bot, child=None, **skill_kwargs)
+        behavior.CURRENT_BEHAVIOR = getattr(ConstructSkills, skill_name)(sender, *skill_args, bot=bot, **skill_kwargs)
         behavior.CURRENT_BEHAVIOR.start()
     else:
         bot.chat("I don't know how to " + message)

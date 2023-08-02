@@ -2,8 +2,8 @@ from typing import List, Tuple
 from javascript import AsyncTask
 import time
 
-from utils.skill_utils import BehaviorNode
-from utils.mc_utils import get_block_id, get_item_id, McVec3
+from utils.skill_utils import BehaviorNode, construct_sequence
+from utils.mc_utils import get_block_id, get_item_id, McVec3, get_item_type
 
 
 def collect(bot, block_type: str):
@@ -28,37 +28,64 @@ def collect(bot, block_type: str):
 class PlaceCraftingTable(BehaviorNode):
     
     def _init_behavior(self):
-        crafting_table = self.bot.findBlock({
-            "matching": get_block_id("crafting_table"),
-            "maxDistance": 100
-        })
-        if crafting_table is None:
-            crafting_table = None
-            for item in self.bot.inventory.items():
-                if item.name == "crafting_table":
-                    crafting_table = item
-                    break
-            if crafting_table is not None:
-                                
-                @AsyncTask(start=True)
-                def equip(task):
-                    self.bot.equip(crafting_table, "hand")
-                
-                @AsyncTask(start=True)
-                def place(task):
-                    self.bot.placeBlock(self.bot.blockAt(self.bot.position), McVec3(0, 1, 0).to_vec3())
+        print("Checking inventory for crafting table")
+        crafting_table = None
+        for item in self.bot.inventory.items():
+            if item.name == "crafting_table":
+                crafting_table = item
+                break
+
+        if crafting_table is not None:  # TODO test
+            print("Placing crafting table")
+            @AsyncTask(start=True)
+            def equip(task):
+                self.bot.equip(crafting_table, "hand")
+            
+            @AsyncTask(start=True)
+            def place(task):
+                self.bot.placeBlock(self.bot.blockAt(self.bot.position), McVec3(0, 1, 0).to_vec3())
+        
+        else:
+            print("No crafting table in inventory")
+            self.finish()
 
     def _get_transitions(self) -> List[Tuple[str, callable]]:
         def handle_place(this, old_block, new_block, *args):
             if new_block.name == "crafting_table":
                 self.finish()
         return [("blockPlaced", handle_place)]
+    
+
+class CraftWithTable(BehaviorNode):
+    def __init__(self, item_type: str, item_quantity: int, crafting_table, **kwargs):
+        self.item_type = item_type
+        self.item_quantity = item_quantity
+        self.crafting_table = crafting_table
+        super().__init__(**kwargs)
+    
+    def _init_behavior(self) -> None:
+        print("Checking for valid recipes")
+        recipes = self.bot.recipesFor(get_item_id(self.item_type), None, 1, self.crafting_table)
+
+        # Need to iterate because recipes is a Proxy object
+        started = False
+        for recipe in recipes:
+            print("Crafting", get_item_type(recipe.result.id))
+            @AsyncTask(start=True)
+            def craft(task):
+                self.bot.craft(recipe, self.item_quantity, self.crafting_table)  # TODO This call times out
+            started = True
+            break
+
+        if not started:
+            print("No valid recipes")
+        self.finish()
 
 
 # All names and doc strings for all members of this class will be added to the context.
 class ItemSkills:
 
-
+    # TODO collect events are not triggered consistently
     class CollectQuantity(BehaviorNode):
         """
         Collects blocks of the specified type and quantity.
@@ -129,58 +156,36 @@ class ItemSkills:
             return [("playerCollect", handle_collect)]
 
 
-    # class CraftItem(Task):
-    #     """
-    #     Collects required materials and crafts the specified item.
-    #     Args:
-    #         item_type (str): The type of item to craft.
-    #     """
-    #     def __init__(self, bot, item_type: str):
-    #         self.item_type = item_type
-    #         super().__init__(bot)
+    class CraftItem(BehaviorNode):
+        """
+        Collects required materials and crafts the specified item.
+        Args:
+            item_type (str): The type of item to craft.
+            item_quantity (int): The quantity of items to craft.
+        """
+        def __init__(self, item_type: str, item_quantity: int, **kwargs):
+            self.item_type = item_type
+            self.item_quantity = item_quantity
+            self.crafting_table = None
+            super().__init__(child=self._build_child, **kwargs)
 
-    #     @property
-    #     def task_id(self):
-    #         return "craft_{}".format(self.item_type)
+        def _build_child(self):
+            if self.crafting_table is None:
+                return construct_sequence([
+                    dict(clss=PlaceCraftingTable),
+                    dict(clss=CraftWithTable, args=[self.item_type, self.item_quantity, self.crafting_table])
+                ], bot=self.bot)
+            else:
+                return CraftWithTable(self.item_type, self.crafting_table, bot=self.bot)
         
-    #     def init_task(self) -> None:
-    #         crafting_table = self.bot.findBlock({
-    #             "matching": get_block_id("crafting_table"),
-    #             "maxDistance": 100
-    #         })
-    #         if crafting_table is None:
-    #             crafting_table = None
-    #             for item in self.bot.inventory.items():
-    #                 if item.name == "crafting_table":
-    #                     crafting_table = item
-    #                     break
-    #             if crafting_table is not None:
-                                    
-    #                 @AsyncTask(start=True)
-    #                 def equip(task):
-    #                     self.bot.equip(crafting_table, "hand")
-                    
-    #                 @AsyncTask(start=True)
-    #                 def place(task):
-    #                     self.bot.placeBlock(self.bot.blockAt(self.bot.position), McVec3(0, 1, 0).to_vec3())
-
-    #         recipes = self.bot.recipesAll(get_item_id(self.item_type), None, crafting_table)
-
-    #         if len(recipes) == 0:
-    #             print("Needs a crafting table")
-    #         else:
-    #             recipe = recipes[0]  # TODO pick easiest recipe
-
-    #             missing_requirements = []
-    #             for req in recipe.ingredients:
-    #                 for item in self.bot.inventory.items():
-    #                     if item.name == req:
-    #                         crafting_table = item
-    #                         break
-
-
-    #             print("Crafting", recipe.result.name)
-    #             @AsyncTask(start=True)
-    #             def craft(task):
-    #                 self.bot.craft(recipe, 1, crafting_table)
-    #                 self.finish_task()
+        def _init_behavior(self) -> None:
+            print("Looking for crafting table nearby")
+            self.crafting_table = self.bot.findBlock({
+                "matching": get_block_id("crafting_table"),
+                "maxDistance": 100
+            })
+            if self.crafting_table is None:
+                print("No crafting table nearby")
+            else:
+                print("Found crafting table")
+            self.finish()

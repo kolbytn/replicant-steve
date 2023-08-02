@@ -226,7 +226,7 @@ class ConstructSkills:
             kwargs.pop("child")
             super().__init__(child=self._build_child, **kwargs)
 
-        def get_tasks(self) -> None:
+        def _init_behavior(self) -> None:
             if self.location == RelativeLocation.BOT_STANDING:
                 self.center = McVec3.from_vec3(self.bot.entity.position)
             elif self.location == RelativeLocation.BOT_LOOKING:
